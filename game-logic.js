@@ -1,25 +1,7 @@
-const modal = document.getElementById("modeSelector");
-document.addEventListener("DOMContentLoaded", () => {
-  modal.showModal(); // Opens modal
-});
-const standardModeBtn = document.getElementById("standard");
-const infiniteModeBtn = document.getElementById("infinite");
-standardModeBtn.addEventListener("click", () => {
-  modal.close(); //close modal
-  standardModeScore();
-  standardModeRule();
-});
-infiniteModeBtn.addEventListener("click", () => {
-  modal.close(); //close modal
-  infiniteModeScore();
-  setInterval(() => {
-    infiniteMode();
-  }, 300);
-});
 let row = 10;
 let col = 10;
-let totalWidth = window.innerWidth;
-let totalHeight = window.innerHeight;
+const totalWidth = window.innerWidth;
+const totalHeight = window.innerHeight;
 let playableWidthPercent = 60 / 100;
 let playableHeightPercent = 91 / 100;
 let startXPercent = 2 / 100;
@@ -36,6 +18,28 @@ let startGapX = 0;
 let startGapY = 0;
 let set = new Set();
 let mainScore = 0;
+const sound = new Audio("assets/audio/brick_break.mp3");
+const modal = document.getElementById("modeSelector");
+const standardModeBtn = document.getElementById("standard");
+const infiniteModeBtn = document.getElementById("infinite");
+const colors = ["red", "yellow", "blue", "green", "orange", "purple"];
+let counter = 0;
+const colorValues = {
+  blue: 5,
+  red: 10,
+  yellow: 15,
+  green: 20,
+  orange: 25,
+  purple: 30,
+};
+ const board = document.createElement("div");
+  board.style.position = "absolute";
+  board.style.left = playableWidth + "px";
+  board.style.transform = "translateX(+50%)";
+  board.style.top = startY + "px";
+  board.style.fontSize = "25px";
+  board.id = "board";
+  board.style.fontWeight = "bold";
 if (boxWidth > boxHeight) {
   boxWidth = boxHeight;
   startGapX = playableWidth - boxWidth * row;
@@ -49,7 +53,6 @@ function getRandomInt() {
   let max = 5;
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-const colors = ["red", "yellow", "blue", "green","orange","purple"];
 for (let i = 0; i < row; i++) {
   for (let j = 0; j < col; j++) {
     let posX = startX + startGapX / 2 + j * boxWidth;
@@ -113,7 +116,6 @@ function selectBoxes(x, y, color) {
 function clearSelectionOfBoxes() {
   set.clear();
 }
-let counter = 0;
 function gravity() {
   let promises = [];
   for (let i = 0; i < col; i++) {
@@ -230,14 +232,6 @@ function centerAlign() {
   }
 }
 function updateScore(color) {
-  const colorValues = {
-    blue: 5,
-    red: 10,
-    yellow: 15,
-    green: 20,
-    orange: 25,
-    purple: 30,
-  };
   if (set.size > 2) mainScore += set.size * colorValues[color];
 }
 function removeSelectedBoxes() {
@@ -250,7 +244,6 @@ function removeSelectedBoxes() {
     brickBlastSound();
   }
 }
-const sound = new Audio("assets/audio/brick_break.mp3");
 function brickBlastSound() {
   sound.currentTime = 0;
   sound.play();
@@ -294,14 +287,6 @@ function infiniteMode() {
     }
   }
 }
-const board = document.createElement("div");
-board.style.position = "absolute";
-board.style.left = playableWidth + "px";
-board.style.transform = "translateX(+50%)";
-board.style.top = startY + "px";
-board.style.fontSize = "25px";
-board.id = "board";
-board.style.fontWeight = "bold";
 function infiniteModeScore() {
   setInterval(() => {
     board.textContent = "Score-" + mainScore;
@@ -321,6 +306,21 @@ function standardModeScore() {
   }, 1000);
   document.body.appendChild(board);
 }
-function standardModeRule(){
-  
+function modeSelectorMoadal() {
+  document.addEventListener("DOMContentLoaded", () => {
+    modal.showModal(); // Opens modal
+  });
+  standardModeBtn.addEventListener("click", () => {
+    modal.close(); //close modal
+    standardModeScore();
+    standardModeRule();
+  });
+  infiniteModeBtn.addEventListener("click", () => {
+    modal.close(); //close modal
+    infiniteModeScore();
+    setInterval(() => {
+      infiniteMode();
+    }, 300);
+  });
 }
+modeSelectorMoadal(); 
