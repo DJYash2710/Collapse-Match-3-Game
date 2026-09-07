@@ -32,14 +32,14 @@ const colorValues = {
   orange: 25,
   purple: 30,
 };
- const board = document.createElement("div");
-  board.style.position = "absolute";
-  board.style.left = playableWidth + "px";
-  board.style.transform = "translateX(+50%)";
-  board.style.top = startY + "px";
-  board.style.fontSize = "25px";
-  board.id = "board";
-  board.style.fontWeight = "bold";
+const board = document.createElement("div");
+board.style.position = "absolute";
+board.style.left = playableWidth + "px";
+board.style.transform = "translateX(+50%)";
+board.style.top = startY + "px";
+board.style.fontSize = "25px";
+board.id = "board";
+board.style.fontWeight = "bold";
 if (boxWidth > boxHeight) {
   boxWidth = boxHeight;
   startGapX = playableWidth - boxWidth * row;
@@ -83,7 +83,9 @@ function createBox(x, y, width, height, color, meta, boxId) {
     selectBoxes(meta.x, meta.y, meta.color);
     updateScore(meta.color);
     removeSelectedBoxes();
+    gameOver();
   });
+
   document.body.appendChild(box);
   return box;
 }
@@ -151,6 +153,7 @@ function gravity() {
               selectBoxes(newMeta.x, newMeta.y, newMeta.color);
               updateScore(newMeta.color);
               removeSelectedBoxes();
+              gameOver();
             });
             resolve();
           };
@@ -159,7 +162,7 @@ function gravity() {
       }
     }
   }
-  Promise.all(promises).then(() => {
+  return Promise.all(promises).then(() => {
     //Only re-enable input after ALL boxes finish animating
     enableInput();
   });
@@ -225,6 +228,7 @@ function centerAlign() {
           selectBoxes(newMeta.x, newMeta.y, newMeta.color);
           updateScore(newMeta.color);
           removeSelectedBoxes();
+          gameOver();
         });
         enableInput();
       };
@@ -239,9 +243,10 @@ function removeSelectedBoxes() {
     set.forEach((boxId) => {
       document.getElementById(boxId)?.remove();
     });
-    gravity();
-    centerAlign();
     brickBlastSound();
+    gravity().then(() => {   // waiting for gravity to be over then calling centeralign
+      centerAlign();
+    });
   }
 }
 function brickBlastSound() {
@@ -313,7 +318,7 @@ function modeSelectorMoadal() {
   standardModeBtn.addEventListener("click", () => {
     modal.close(); //close modal
     standardModeScore();
-    standardModeRule();
+    // standardModeRule();
   });
   infiniteModeBtn.addEventListener("click", () => {
     modal.close(); //close modal
@@ -323,4 +328,27 @@ function modeSelectorMoadal() {
     }, 300);
   });
 }
-modeSelectorMoadal(); 
+function gameOver() {
+  let matchesCount = 0;
+  for (let i = 0; i < col; i++) {        
+    for (let j = 0; j < row; j++) {      
+      let id = document.getElementById("" + i + j);
+      if (!id) continue;                  // skip removed boxes
+      let color = id.style.backgroundColor;
+      clearSelectionOfBoxes();            // reset set before each check
+      selectBoxes(i, j, color);
+      if (set.size > 2) {
+        matchesCount++;
+      }
+    }
+  }
+  clearSelectionOfBoxes();               //  clean up after loop
+  if (matchesCount == 0) {
+    gameOverScreen();
+  }
+}
+
+function gameOverScreen() {
+  console.log("GameOver - Final Score: " + mainScore);
+}
+modeSelectorMoadal();
